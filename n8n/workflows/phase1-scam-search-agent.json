@@ -2,11 +2,11 @@
   "name": "Phase 1 - Scam Search Agent",
   "nodes": [
     {
-      "parameters": {},
+      "parameters": {"inputSource": "passthrough"},
       "id": "a7ba4f7e-5e4b-4f0b-b813-0bf9dcad1001",
       "name": "When Executed by Another Workflow",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
-      "typeVersion": 1,
+      "typeVersion": 1.2,
       "position": [260, 300]
     },
     {
@@ -48,8 +48,9 @@
         "headerParameters": {"parameters": [{"name": "Authorization", "value": "=Bearer {{ $env.OPENAI_API_KEY }}"}, {"name": "Content-Type", "value": "application/json"}]},
         "sendBody": true,
         "contentType": "json",
-        "jsonBody": "={{ JSON.stringify($('Build Search Agent Prompt').first().json.llm_request) }}",
-        "options": {"timeout": 60000}
+        "specifyBody": "json",
+        "jsonBody": "={{ $('Build Search Agent Prompt').first().json.llm_request }}",
+        "options": {"timeout": 180000}
       },
       "id": "0b5a0abb-4090-4f88-9e2d-0158f50f1005",
       "name": "Search Agent LLM Reasoning",
@@ -59,7 +60,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const context = $('Build Search Agent Prompt').first().json;\nconst raw = $input.first().json.choices?.[0]?.message?.content;\nif (!raw) throw new Error('LLM response did not contain choices[0].message.content');\nlet decision; try { decision = JSON.parse(raw.replace(/^```json\\s*|\\s*```$/g, '')); } catch { throw new Error('Search Agent returned malformed JSON'); }\nconst allowed = new Map(context.candidates.map(c => [c.evidence_id, c]));\nconst refs = (decision.evidence_refs ?? []).filter(id => allowed.has(id));\nif (refs.length === 0 && context.candidates.length > 0) throw new Error('Search Agent selected no valid evidence IDs');\nconst now = new Date().toISOString();\nconst evidence = refs.map(id => { const c = allowed.get(id); return { evidence_id: c.evidence_id, source_id: c.source_id, claim: c.title || 'Retrieved candidate source', excerpt: c.content, support: 'retrieved', status: 'unverified', retrieved_at: now }; });\nconst sources = refs.map(id => { const c = allowed.get(id); return { source_id: c.source_id, url: c.url, title: c.title, retrieved_at: now, provider_score: c.score }; });\nconst action = ['SEND_TO_VERIFICATION','REQUEST_MORE_EVIDENCE','ESCALATE'].includes(decision.recommended_action) ? decision.recommended_action : 'SEND_TO_VERIFICATION';\nconst message = { message_id: `MSG-${crypto.randomUUID()}`, case_id: context.state.case_id, state_version: context.state.state_version ?? 0, sender: 'scam_search_agent', recipient: action === 'SEND_TO_VERIFICATION' ? 'verification_agent' : 'n8n_orchestrator', message_type: 'DISCOVERY', objective: String(decision.objective ?? context.search_query), evidence_refs: refs, findings: Array.isArray(decision.findings) ? decision.findings.map(String) : [], confidence: Math.max(0, Math.min(1, Number(decision.confidence ?? 0))), rationale: String(decision.rationale ?? 'Known-scam research evidence collected for Verification.'), missing_information: Array.isArray(decision.missing_information) ? decision.missing_information.map(String) : [], requested_action: String(decision.requested_action ?? 'VERIFY_KNOWN_SCAM_PATTERN'), recommended_action: action, status: ['IN_PROGRESS','HELD_FOR_REVIEW','FAILED'].includes(decision.status) ? decision.status : 'IN_PROGRESS', timestamp: now };\nconst case_patch = { sources: [...(context.state.sources ?? []), ...sources], evidence: [...(context.state.evidence ?? []), ...evidence], research_count: (context.state.research_count ?? 0) + 1, missing_information: message.missing_information, agent_history: [...(context.state.agent_history ?? []), message] };\nreturn [{ json: { case_id: context.state.case_id, message, case_patch } }];"
+        "jsCode": "const context = $('Build Search Agent Prompt').first().json;\nconst raw = $input.first().json.choices?.[0]?.message?.content;\nif (!raw) throw new Error('LLM response did not contain choices[0].message.content');\nlet decision; try { decision = JSON.parse(raw.replace(/^```json\\s*|\\s*```$/g, '')); } catch { throw new Error('Search Agent returned malformed JSON'); }\nconst allowed = new Map(context.candidates.map(c => [c.evidence_id, c]));\nconst refs = (decision.evidence_refs ?? []).filter(id => allowed.has(id));\nif (refs.length === 0 && context.candidates.length > 0) throw new Error('Search Agent selected no valid evidence IDs');\nconst now = new Date().toISOString();\nconst evidence = refs.map(id => { const c = allowed.get(id); return { evidence_id: c.evidence_id, source_id: c.source_id, claim: c.title || 'Retrieved candidate source', excerpt: c.content, support: 'retrieved', status: 'unverified', retrieved_at: now }; });\nconst sources = refs.map(id => { const c = allowed.get(id); return { source_id: c.source_id, url: c.url, title: c.title, retrieved_at: now, provider_score: c.score }; });\nconst action = ['SEND_TO_VERIFICATION','REQUEST_MORE_EVIDENCE','ESCALATE'].includes(decision.recommended_action) ? decision.recommended_action : 'SEND_TO_VERIFICATION';\nconst message = { message_id: `MSG-${Date.now().toString(36) + Math.random().toString(36).slice(2, 10)}`, case_id: context.state.case_id, state_version: context.state.state_version ?? 0, sender: 'scam_search_agent', recipient: action === 'SEND_TO_VERIFICATION' ? 'verification_agent' : 'n8n_orchestrator', message_type: 'DISCOVERY', objective: String(decision.objective ?? context.search_query), evidence_refs: refs, findings: Array.isArray(decision.findings) ? decision.findings.map(String) : [], confidence: Math.max(0, Math.min(1, Number(decision.confidence ?? 0))), rationale: String(decision.rationale ?? 'Known-scam research evidence collected for Verification.'), missing_information: Array.isArray(decision.missing_information) ? decision.missing_information.map(String) : [], requested_action: String(decision.requested_action ?? 'VERIFY_KNOWN_SCAM_PATTERN'), recommended_action: action, status: ['IN_PROGRESS','HELD_FOR_REVIEW','FAILED'].includes(decision.status) ? decision.status : 'IN_PROGRESS', timestamp: now };\nconst case_patch = { sources: [...(context.state.sources ?? []), ...sources], evidence: [...(context.state.evidence ?? []), ...evidence], research_count: (context.state.research_count ?? 0) + 1, missing_information: message.missing_information, agent_history: [...(context.state.agent_history ?? []), message] };\nreturn [{ json: { case_id: context.state.case_id, message, case_patch } }];"
       },
       "id": "9ce3937c-ff60-414e-a414-15493c111006",
       "name": "Validate Search Decision and Build Patch",
