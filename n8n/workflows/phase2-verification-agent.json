@@ -1,13 +1,19 @@
 {
+  "id": "FIYB5Cv8Q0HH8eeD",
   "name": "Phase 2 - Verification Agent",
   "nodes": [
     {
-      "parameters": {"inputSource": "passthrough"},
+      "parameters": {
+        "inputSource": "passthrough"
+      },
       "id": "d32fa022-40f2-4e4e-9c11-000000000001",
       "name": "When Executed by Another Workflow",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
-      "typeVersion": 1.2,
-      "position": [260, 300]
+      "typeVersion": 1.1,
+      "position": [
+        272,
+        304
+      ]
     },
     {
       "parameters": {
@@ -17,7 +23,10 @@
       "name": "Validate Verification Input",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [500, 300]
+      "position": [
+        512,
+        304
+      ]
     },
     {
       "parameters": {
@@ -27,25 +36,43 @@
       "name": "Build Verification Prompt",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [730, 300]
+      "position": [
+        736,
+        304
+      ]
     },
     {
       "parameters": {
         "method": "POST",
         "url": "={{ $env.OPENAI_API_URL || 'http://ollama:11434/v1/chat/completions' }}",
         "sendHeaders": true,
-        "headerParameters": {"parameters": [{"name": "Authorization", "value": "=Bearer {{ $env.OPENAI_API_KEY || 'ollama' }}"}, {"name": "Content-Type", "value": "application/json"}]},
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.OPENAI_API_KEY || 'ollama' }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
         "sendBody": true,
-        "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ { ...$('Build Verification Prompt').first().json.llm_request, max_tokens: 320, temperature: 0.1 } }}",
-        "options": {"timeout": 180000}
+        "jsonBody": "={{ { ...$('Build Verification Prompt').first().json.llm_request, max_tokens: 1200, temperature: 0.1 } }}",
+        "options": {
+          "timeout": 180000
+        }
       },
       "id": "d32fa022-40f2-4e4e-9c11-000000000004",
       "name": "Verification Agent LLM Reasoning",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [970, 300]
+      "position": [
+        976,
+        304
+      ]
     },
     {
       "parameters": {
@@ -55,18 +82,63 @@
       "name": "Validate Verification Decision and Build Patch",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1220, 300]
+      "position": [
+        1232,
+        304
+      ]
     }
   ],
   "connections": {
-    "When Executed by Another Workflow": {"main": [[{"node": "Validate Verification Input", "type": "main", "index": 0}]]},
-    "Validate Verification Input": {"main": [[{"node": "Build Verification Prompt", "type": "main", "index": 0}]]},
-    "Build Verification Prompt": {"main": [[{"node": "Verification Agent LLM Reasoning", "type": "main", "index": 0}]]},
-    "Verification Agent LLM Reasoning": {"main": [[{"node": "Validate Verification Decision and Build Patch", "type": "main", "index": 0}]]}
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Validate Verification Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Verification Input": {
+      "main": [
+        [
+          {
+            "node": "Build Verification Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Verification Prompt": {
+      "main": [
+        [
+          {
+            "node": "Verification Agent LLM Reasoning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verification Agent LLM Reasoning": {
+      "main": [
+        [
+          {
+            "node": "Validate Verification Decision and Build Patch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
-  "pinData": {},
-  "active": false,
-  "settings": {"executionOrder": "v1"},
-  "meta": {"templateCredsSetupCompleted": false},
-  "tags": []
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "8e554b5b-051e-47ae-8cff-ac4702c462c7"
 }
