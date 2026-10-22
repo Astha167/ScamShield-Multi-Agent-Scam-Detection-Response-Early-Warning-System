@@ -1,13 +1,19 @@
 {
+  "id": "wxuh8aIJWRQWUyzc",
   "name": "Phase 1 - Scam Analysis Agent",
   "nodes": [
     {
-      "parameters": {"inputSource": "passthrough"},
+      "parameters": {
+        "inputSource": "passthrough"
+      },
       "id": "cca3731e-2fd3-4f38-abd6-a3df3f7d2001",
       "name": "When Executed by Another Workflow",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
-      "typeVersion": 1.2,
-      "position": [260, 300]
+      "typeVersion": 1.1,
+      "position": [
+        260,
+        300
+      ]
     },
     {
       "parameters": {
@@ -17,7 +23,10 @@
       "name": "Validate Analysis Input",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [480, 300]
+      "position": [
+        480,
+        300
+      ]
     },
     {
       "parameters": {
@@ -27,25 +36,44 @@
       "name": "Build Analysis Agent Prompt",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [700, 300]
+      "position": [
+        700,
+        300
+      ]
     },
     {
       "parameters": {
         "method": "POST",
         "url": "={{ $env.OPENAI_API_URL || 'https://api.openai.com/v1/chat/completions' }}",
         "sendHeaders": true,
-        "headerParameters": {"parameters": [{"name": "Authorization", "value": "=Bearer {{ $env.OPENAI_API_KEY }}"}, {"name": "Content-Type", "value": "application/json"}]},
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.OPENAI_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
         "jsonBody": "={{ $('Build Analysis Agent Prompt').first().json.llm_request }}",
-        "options": {"timeout": 180000}
+        "options": {
+          "timeout": 180000
+        }
       },
       "id": "50ceee3e-b3e1-46fa-88cc-fd9d16ad2004",
       "name": "Analysis Agent LLM Reasoning",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [920, 300]
+      "position": [
+        920,
+        300
+      ]
     },
     {
       "parameters": {
@@ -55,19 +83,63 @@
       "name": "Validate Analysis Decision and Build Patch",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1140, 300]
+      "position": [
+        1140,
+        300
+      ]
     }
   ],
-  "pinData": {},
   "connections": {
-    "When Executed by Another Workflow": {"main": [[{"node": "Validate Analysis Input", "type": "main", "index": 0}]]},
-    "Validate Analysis Input": {"main": [[{"node": "Build Analysis Agent Prompt", "type": "main", "index": 0}]]},
-    "Build Analysis Agent Prompt": {"main": [[{"node": "Analysis Agent LLM Reasoning", "type": "main", "index": 0}]]},
-    "Analysis Agent LLM Reasoning": {"main": [[{"node": "Validate Analysis Decision and Build Patch", "type": "main", "index": 0}]]}
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Validate Analysis Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Analysis Input": {
+      "main": [
+        [
+          {
+            "node": "Build Analysis Agent Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Analysis Agent Prompt": {
+      "main": [
+        [
+          {
+            "node": "Analysis Agent LLM Reasoning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analysis Agent LLM Reasoning": {
+      "main": [
+        [
+          {
+            "node": "Validate Analysis Decision and Build Patch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
-  "active": false,
-  "settings": {"executionOrder": "v1"},
-  "versionId": "c076faf1-ea49-4c18-9a1e-400000000002",
-  "meta": {"templateCredsSetupCompleted": false},
-  "tags": []
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "6272456f-cb39-4113-9063-4ef745ddb3eb"
 }

@@ -1,4 +1,5 @@
 {
+  "id": "Oyr7kvWm4rpGmjB8",
   "name": "Phase 1 - Scam Search Agent",
   "nodes": [
     {
@@ -38,7 +39,7 @@
       "id": "fb3edd3f-864a-4512-8226-d1e7e57468a8",
       "name": "When Executed by Another Workflow",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.1,
       "position": [
         1392,
         1120
@@ -103,7 +104,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ ...$('Build Search Agent Prompt').first().json.llm_request, max_tokens: 320, temperature: 0.1 }) }}",
+        "jsonBody": "={{ JSON.stringify({ ...$('Build Search Agent Prompt').first().json.llm_request, max_tokens: 1200, temperature: 0.1 }) }}",
         "options": {
           "timeout": 180000
         }
@@ -131,7 +132,6 @@
       ]
     }
   ],
-  "pinData": {},
   "connections": {
     "Receive Frontend Search": {
       "main": [
@@ -214,13 +214,9 @@
   "active": true,
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate"
+    "binaryMode": "separate",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
-  "versionId": "76f7796f-2969-4e87-b1c3-d1984a29b226",
-  "meta": {
-    "instanceId": "c174a6a167c0458b29bf5e3f85d1e829f2047ead0a2884d3313edd78d5e51833"
-  },
-  "nodeGroups": [],
-  "id": "Oyr7kvWm4rpGmjB8",
-  "tags": []
+  "versionId": "af1b4967-c58e-4b56-94e8-3ce583c745ac"
 }

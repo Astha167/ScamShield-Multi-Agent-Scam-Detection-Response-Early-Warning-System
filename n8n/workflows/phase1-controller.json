@@ -1,29 +1,137 @@
 {
+  "id": "JXNekPkAwKkLUZ7C",
   "name": "Phase 1 - Intake and Analysis Controller",
   "nodes": [
-    {"parameters": {}, "id": "d37be7bf-7c50-4c25-9858-bae6a5500001", "name": "Manual Demo Trigger", "type": "n8n-nodes-base.manualTrigger", "typeVersion": 1, "position": [260, 300]},
     {
-      "parameters": {"jsCode": "const now = new Date().toISOString();\nconst caseId = `SCAM-${Date.now()}`;\nconst narrative = 'A WhatsApp account offered a work-from-home job and asked me to pay a registration fee before starting.';\nreturn [{ json: {\n  case_state: { case_id: caseId, state_version: 0, sources: [], evidence: [], indicators: [], analysis: null, missing_information: [], research_count: 0, revision_count: 0, agent_history: [], created_at: now, updated_at: now },\n  user_submission: { narrative, country: 'IN', evidence: [{ name: 'Example WhatsApp message', text: 'Pay a registration fee today to unlock your work assignment.' }] },\n  incoming_message: { case_id: caseId, sender: 'user_intake', recipient: 'scam_analysis_agent', message_type: 'USER_SUBMISSION', objective: 'Structure this user report and decide whether it is ready for verification.', evidence_refs: [], findings: [], confidence: 0, rationale: 'Safe Phase 1 demonstration input.', missing_information: [], requested_action: 'ANALYSE_USER_REPORT', recommended_action: 'SEND_TO_ANALYSIS', status: 'IN_PROGRESS', timestamp: now }\n} }];"},
-      "id": "c82cad6c-087a-4558-b5eb-834beb500002", "name": "Initialise Safe Demonstration Case", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [480, 300]
+      "parameters": {},
+      "id": "d37be7bf-7c50-4c25-9858-bae6a5500001",
+      "name": "Manual Demo Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        272,
+        304
+      ]
     },
     {
-      "parameters": {"workflowId": {"__rl": true, "value": "", "mode": "list", "cachedResultName": "Select the newly imported Phase 1 - Scam Analysis Agent"}, "options": {"waitForSubWorkflow": true}},
-      "id": "398a7c3f-d866-4e10-ab98-d12a1caa0005", "name": "Invoke Scam Analysis Agent", "type": "n8n-nodes-base.executeWorkflow", "typeVersion": 1.2, "position": [700, 300]
+      "parameters": {
+        "jsCode": "const now = new Date().toISOString();\nconst caseId = `SCAM-${Date.now()}`;\nconst narrative = 'A WhatsApp account offered a work-from-home job and asked me to pay a registration fee before starting.';\nreturn [{ json: {\n  case_state: { case_id: caseId, state_version: 0, sources: [], evidence: [], indicators: [], analysis: null, missing_information: [], research_count: 0, revision_count: 0, agent_history: [], created_at: now, updated_at: now },\n  user_submission: { narrative, country: 'IN', evidence: [{ name: 'Example WhatsApp message', text: 'Pay a registration fee today to unlock your work assignment.' }] },\n  incoming_message: { case_id: caseId, sender: 'user_intake', recipient: 'scam_analysis_agent', message_type: 'USER_SUBMISSION', objective: 'Structure this user report and decide whether it is ready for verification.', evidence_refs: [], findings: [], confidence: 0, rationale: 'Safe Phase 1 demonstration input.', missing_information: [], requested_action: 'ANALYSE_USER_REPORT', recommended_action: 'SEND_TO_ANALYSIS', status: 'IN_PROGRESS', timestamp: now }\n} }];"
+      },
+      "id": "c82cad6c-087a-4558-b5eb-834beb500002",
+      "name": "Initialise Safe Demonstration Case",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        304
+      ]
     },
     {
-      "parameters": {"jsCode": "const beforeAnalysis = $('Initialise Safe Demonstration Case').first().json.case_state;\nconst result = $input.first().json;\nconst patch = result.case_patch ?? {};\nconst state = { ...beforeAnalysis, ...patch, state_version: (beforeAnalysis.state_version ?? 0) + 1, updated_at: new Date().toISOString() };\nreturn [{ json: { case_state: state, analysis_message: result.message } }];"},
-      "id": "3cee5514-f4eb-414d-a8fa-a44b9a7f0006", "name": "Persist Analysis Result", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [920, 300]
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "wxuh8aIJWRQWUyzc",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/wxuh8aIJWRQWUyzc",
+          "cachedResultName": "Phase 1 - Scam Analysis Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "398a7c3f-d866-4e10-ab98-d12a1caa0005",
+      "name": "Invoke Scam Analysis Agent",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        704,
+        304
+      ]
     },
     {
-      "parameters": {"jsCode": "const current = $input.first().json;\nconst message = current.analysis_message;\nconst routes = { SEND_TO_VERIFICATION: 'PHASE_2_VERIFICATION', REQUEST_MORE_USER_EVIDENCE: 'REQUEST_USER_EVIDENCE', ESCALATE: 'HELD_FOR_REVIEW' };\nreturn [{ json: { ...current, next_stage: routes[message.recommended_action] ?? 'HELD_FOR_REVIEW', final_message: message, note: 'This controller does not invoke Scam Search. Phase 2 Verification decides whether to request Search.' } }];"},
-      "id": "4d965077-7129-42b7-a1e8-929da41c0012", "name": "Show Phase 1 Decision", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [1140, 300]
+      "parameters": {
+        "jsCode": "const beforeAnalysis = $('Initialise Safe Demonstration Case').first().json.case_state;\nconst result = $input.first().json;\nconst patch = result.case_patch ?? {};\nconst state = { ...beforeAnalysis, ...patch, state_version: (beforeAnalysis.state_version ?? 0) + 1, updated_at: new Date().toISOString() };\nreturn [{ json: { case_state: state, analysis_message: result.message } }];"
+      },
+      "id": "3cee5514-f4eb-414d-a8fa-a44b9a7f0006",
+      "name": "Persist Analysis Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const current = $input.first().json;\nconst message = current.analysis_message;\nconst routes = { SEND_TO_VERIFICATION: 'PHASE_2_VERIFICATION', REQUEST_MORE_USER_EVIDENCE: 'REQUEST_USER_EVIDENCE', ESCALATE: 'HELD_FOR_REVIEW' };\nreturn [{ json: { ...current, next_stage: routes[message.recommended_action] ?? 'HELD_FOR_REVIEW', final_message: message, note: 'This controller does not invoke Scam Search. Phase 2 Verification decides whether to request Search.' } }];"
+      },
+      "id": "4d965077-7129-42b7-a1e8-929da41c0012",
+      "name": "Show Phase 1 Decision",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1152,
+        304
+      ]
     }
   ],
   "connections": {
-    "Manual Demo Trigger": {"main": [[{"node": "Initialise Safe Demonstration Case", "type": "main", "index": 0}]]},
-    "Initialise Safe Demonstration Case": {"main": [[{"node": "Invoke Scam Analysis Agent", "type": "main", "index": 0}]]},
-    "Invoke Scam Analysis Agent": {"main": [[{"node": "Persist Analysis Result", "type": "main", "index": 0}]]},
-    "Persist Analysis Result": {"main": [[{"node": "Show Phase 1 Decision", "type": "main", "index": 0}]]}
+    "Manual Demo Trigger": {
+      "main": [
+        [
+          {
+            "node": "Initialise Safe Demonstration Case",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialise Safe Demonstration Case": {
+      "main": [
+        [
+          {
+            "node": "Invoke Scam Analysis Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invoke Scam Analysis Agent": {
+      "main": [
+        [
+          {
+            "node": "Persist Analysis Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Persist Analysis Result": {
+      "main": [
+        [
+          {
+            "node": "Show Phase 1 Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
-  "pinData": {}, "active": false, "settings": {"executionOrder": "v1"}, "meta": {"templateCredsSetupCompleted": false}, "tags": []
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "63e0636e-b56e-4349-b1f0-12ceb44eb81f"
 }
