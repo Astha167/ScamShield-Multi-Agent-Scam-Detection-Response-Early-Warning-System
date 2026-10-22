@@ -52,7 +52,7 @@ function renderResult(output) {
 $('#report-form').addEventListener('submit', async (event) => {
   event.preventDefault(); const form = event.currentTarget; const status = $('#report-status'); const button = form.querySelector('button[type="submit"]');
   const data = Object.fromEntries(new FormData(form).entries()); lastReport = data; status.textContent = 'Analysis is running. This may take a few minutes…'; status.className = 'status'; button.disabled = true;
-  try { const response = await fetch('/webhook/scam-report-test', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) }); if (!response.ok) throw new Error(response.status === 404 || response.status === 500 ? 'The Phase 3 webhook is not published.' : `Request failed (${response.status})`); const raw = await response.json(); renderResult(Array.isArray(raw) ? raw[0] : raw); status.textContent = 'Analysis completed.'; status.classList.add('success'); }
+  try { const response = await fetch('/webhook/scam-report-test', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) }); if (!response.ok) throw new Error(response.status === 404 || response.status === 500 ? 'The ScamShield report workflow is not active.' : `Request failed (${response.status})`); const raw = await response.json(); renderResult(Array.isArray(raw) ? raw[0] : raw); status.textContent = 'Analysis completed.'; status.classList.add('success'); }
   catch (error) { status.textContent = `Could not analyse this report: ${error.message}`; status.classList.add('error'); } finally { button.disabled = false; }
 });
 
