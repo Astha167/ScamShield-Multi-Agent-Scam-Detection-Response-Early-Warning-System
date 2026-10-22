@@ -1,5 +1,4 @@
 {
-  "id": "Oyr7kvWm4rpGmjB8",
   "name": "Phase 1 - Scam Search Agent",
   "nodes": [
     {
@@ -120,7 +119,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const context = $('Build Search Agent Prompt').first().json;\nconst raw = $input.first().json.choices?.[0]?.message?.content;\nif (!raw) throw new Error('LLM response did not contain choices[0].message.content');\nlet decision; try { decision = JSON.parse(raw.replace(/^```json\\s*|\\s*```$/g, '')); } catch { throw new Error('Search Agent returned malformed JSON'); }\nconst allowed = new Map(context.candidates.map(c => [c.evidence_id, c]));\nconst refs = (decision.evidence_refs ?? []).filter(id => allowed.has(id));\nif (refs.length === 0 && context.candidates.length > 0) throw new Error('Search Agent selected no valid evidence IDs');\nconst now = new Date().toISOString();\nconst evidence = refs.map(id => { const c = allowed.get(id); return { evidence_id: c.evidence_id, source_id: c.source_id, claim: c.title || 'Retrieved candidate source', excerpt: c.content, support: 'retrieved', status: 'unverified', retrieved_at: now }; });\nconst sources = refs.map(id => { const c = allowed.get(id); return { source_id: c.source_id, url: c.url, title: c.title, retrieved_at: now, provider_score: c.score }; });\nconst action = ['SEND_TO_VERIFICATION','REQUEST_MORE_EVIDENCE','ESCALATE'].includes(decision.recommended_action) ? decision.recommended_action : 'SEND_TO_VERIFICATION';\nconst message = { message_id: `MSG-${Date.now().toString(36) + Math.random().toString(36).slice(2, 10)}`, case_id: context.state.case_id, state_version: context.state.state_version ?? 0, sender: 'scam_search_agent', recipient: action === 'SEND_TO_VERIFICATION' ? 'verification_agent' : 'n8n_orchestrator', message_type: 'DISCOVERY', objective: String(decision.objective ?? context.search_query), evidence_refs: refs, findings: Array.isArray(decision.findings) ? decision.findings.map(String) : [], confidence: Math.max(0, Math.min(1, Number(decision.confidence ?? 0))), rationale: String(decision.rationale ?? 'Known-scam research evidence collected for Verification.'), missing_information: Array.isArray(decision.missing_information) ? decision.missing_information.map(String) : [], requested_action: String(decision.requested_action ?? 'VERIFY_KNOWN_SCAM_PATTERN'), recommended_action: action, status: ['IN_PROGRESS','HELD_FOR_REVIEW','FAILED'].includes(decision.status) ? decision.status : 'IN_PROGRESS', timestamp: now };\nconst case_patch = { sources: [...(context.state.sources ?? []), ...sources], evidence: [...(context.state.evidence ?? []), ...evidence], research_count: (context.state.research_count ?? 0) + 1, missing_information: message.missing_information, agent_history: [...(context.state.agent_history ?? []), message] };\nreturn [{ json: { case_id: context.state.case_id, message, case_patch } }];"
+        "jsCode": "\nconst context = $('Build Search Agent Prompt').first().json;\nconst raw = $input.first().json.choices?.[0]?.message?.content;\n\nif (!raw) {\n  throw new Error('LLM response did not contain choices[0].message.content');\n}\n\nlet decision;\n\ntry {\n  decision = JSON.parse(\n    raw.replace(/^```(?:json)?\\s*|\\s*```$/g, '').trim()\n  );\n} catch {\n  throw new Error('Search Agent returned malformed JSON');\n}\n\nif (!decision || typeof decision !== 'object' || Array.isArray(decision)) {\n  throw new Error('Search Agent response must be a JSON object');\n}\n\nconst candidates = Array.isArray(context.candidates)\n  ? context.candidates\n  : [];\n\nconst allowed = new Map(\n  candidates\n    .filter(c => c && c.evidence_id != null)\n    .map(c => [String(c.evidence_id), c])\n);\n\nconst requestedRefs = Array.isArray(decision.evidence_refs)\n  ? decision.evidence_refs\n  : [];\n\nconst refs = requestedRefs\n  .filter(id => typeof id === 'string' || typeof id === 'number')\n  .map(id => String(id))\n  .filter(id => allowed.has(id));\n\n// Reject IDs that were actually supplied but do not exist.\n// An empty evidence_refs array is valid when no sources are relevant.\nconst invalidRefs = requestedRefs.filter(\n  id =>\n    (typeof id !== 'string' && typeof id !== 'number') ||\n    !allowed.has(String(id))\n);\n\nif (invalidRefs.length > 0) {\n  throw new Error(\n    `Search Agent selected invalid evidence IDs: ${JSON.stringify(invalidRefs)}`\n  );\n}\n\nconst now = new Date().toISOString();\n\nconst evidence = refs.map(id => {\n  const c = allowed.get(id);\n\n  return {\n    evidence_id: c.evidence_id,\n    source_id: c.source_id,\n    claim: c.title || 'Retrieved candidate source',\n    excerpt: c.content || '',\n    support: 'retrieved',\n    status: 'unverified',\n    retrieved_at: now\n  };\n});\n\nconst sources = refs.map(id => {\n  const c = allowed.get(id);\n\n  return {\n    source_id: c.source_id,\n    url: c.url,\n    title: c.title,\n    retrieved_at: now,\n    provider_score: c.score\n  };\n});\n\nconst validActions = [\n  'SEND_TO_VERIFICATION',\n  'REQUEST_MORE_EVIDENCE',\n  'ESCALATE'\n];\n\nconst recommendedAction = validActions.includes(\n  decision.recommended_action\n)\n  ? decision.recommended_action\n  : refs.length > 0\n    ? 'SEND_TO_VERIFICATION'\n    : 'REQUEST_MORE_EVIDENCE';\n\nreturn [{\n  json: {\n    ...context,\n    search_decision: {\n      ...decision,\n      evidence_refs: refs,\n      evidence,\n      sources,\n      recommended_action: recommendedAction,\n      validated_at: now\n    }\n  }\n}];\n"
       },
       "id": "3ae02a4c-fc29-463c-88c4-5d7a2054bf13",
       "name": "Validate Search Decision and Build Patch",
@@ -132,6 +131,7 @@
       ]
     }
   ],
+  "pinData": {},
   "connections": {
     "Receive Frontend Search": {
       "main": [
@@ -218,5 +218,10 @@
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": false
   },
-  "versionId": "af1b4967-c58e-4b56-94e8-3ce583c745ac"
+  "versionId": "a5f74d42-3ead-40eb-9687-fce1f8065b0e",
+  "meta": {
+    "instanceId": "c174a6a167c0458b29bf5e3f85d1e829f2047ead0a2884d3313edd78d5e51833"
+  },
+  "id": "Oyr7kvWm4rpGmjB8",
+  "tags": []
 }
