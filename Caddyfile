@@ -1,19 +1,48 @@
+
 {$TLS_HOSTNAME} {
-	encode zstd gzip
-	@blocked path / /home /signin /workflow/* /workflows/* /executions/* /settings/* /rest/* /api/* /healthz /healthz/*
-	handle @blocked {
-		respond "Not found" 404
-	}
-	handle /webhook/* {
-		reverse_proxy n8n:5678
-	}
-	handle {
-		reverse_proxy frontend:80
-	}
+    encode zstd gzip
+
+    # Block n8n editor, administration, and internal endpoints
+    @blocked path \
+        / \
+        /home \
+        /signin \
+        /signout \
+        /workflow \
+        /workflow/* \
+        /workflows \
+        /workflows/* \
+        /execution \
+        /executions \
+        /executions/* \
+        /settings \
+        /settings/* \
+        /rest \
+        /rest/* \
+        /api \
+        /api/* \
+        /healthz \
+        /healthz/* \
+        /metrics \
+        /metrics/*
+
+    handle @blocked {
+        respond "Not found" 404
+    }
+
+    # Route n8n production webhooks to n8n
+    handle /webhook/* {
+        reverse_proxy n8n:5678
+    }
+
+    # Route all remaining public requests to the frontend
+    handle {
+        reverse_proxy frontend:80
+    }
 }
 
-# Keep n8n admin access private. Use SSH port forwarding to reach this listener.
+# Private n8n administration proxy.
+# Docker Compose must publish this port only on host loopback.
 :5678 {
-	bind 127.0.0.1
-	reverse_proxy n8n:5678
+    reverse_proxy n8n:5678
 }
