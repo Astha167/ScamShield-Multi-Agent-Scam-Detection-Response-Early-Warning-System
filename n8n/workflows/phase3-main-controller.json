@@ -1,4 +1,5 @@
 {
+  "id": "wb4gQDuDdwmEFpmj",
   "name": "Phase 3 - Main Scam Alert Orchestrator",
   "nodes": [
     {
@@ -35,9 +36,9 @@
       "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "itegQqW50cfwqglq",
+          "value": "wxuh8aIJWRQWUyzc",
           "mode": "list",
-          "cachedResultUrl": "/workflow/itegQqW50cfwqglq",
+          "cachedResultUrl": "/workflow/wxuh8aIJWRQWUyzc",
           "cachedResultName": "Phase 1 - Scam Analysis Agent"
         },
         "workflowInputs": {
@@ -111,9 +112,9 @@
       "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "HEEneTO6A6nNTT1l",
+          "value": "FIYB5Cv8Q0HH8eeD",
           "mode": "list",
-          "cachedResultUrl": "/workflow/HEEneTO6A6nNTT1l",
+          "cachedResultUrl": "/workflow/FIYB5Cv8Q0HH8eeD",
           "cachedResultName": "Phase 2 - Verification Agent"
         },
         "workflowInputs": {
@@ -252,9 +253,9 @@
       "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "HEEneTO6A6nNTT1l",
+          "value": "FIYB5Cv8Q0HH8eeD",
           "mode": "list",
-          "cachedResultUrl": "/workflow/HEEneTO6A6nNTT1l",
+          "cachedResultUrl": "/workflow/FIYB5Cv8Q0HH8eeD",
           "cachedResultName": "Phase 2 - Verification Agent"
         },
         "workflowInputs": {
@@ -328,9 +329,9 @@
       "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "miO0TzEeaJd71X7c",
+          "value": "qGncLaPFpSEVd7IS",
           "mode": "list",
-          "cachedResultUrl": "/workflow/miO0TzEeaJd71X7c",
+          "cachedResultUrl": "/workflow/qGncLaPFpSEVd7IS",
           "cachedResultName": "Phase 2 - Scam Alert Agent"
         },
         "workflowInputs": {
@@ -471,7 +472,6 @@
       ]
     }
   ],
-  "pinData": {},
   "connections": {
     "Receive Frontend Report": {
       "main": [
@@ -727,11 +727,5 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "f6e0c473-dd17-40c8-8292-40229170a99c",
-  "meta": {
-    "instanceId": "c174a6a167c0458b29bf5e3f85d1e829f2047ead0a2884d3313edd78d5e51833"
-  },
-  "nodeGroups": [],
-  "id": "wb4gQDuDdwmEFpmj",
-  "tags": []
+  "versionId": "c10f8b41-0dac-412c-920b-974fbcfe4275"
 }
