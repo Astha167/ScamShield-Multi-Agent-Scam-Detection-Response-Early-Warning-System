@@ -1,61 +1,460 @@
 {
+  "id": "W1H30RiJQaYmJPhA",
   "name": "Phase 2 - Verification and Alert Controller",
   "nodes": [
-    {"parameters": {}, "id": "e43cb044-60f4-4f6f-9d33-000000000001", "name": "Manual Demo Trigger", "type": "n8n-nodes-base.manualTrigger", "typeVersion": 1, "position": [220, 300]},
     {
-      "parameters": {"jsCode": "const now = new Date().toISOString();\nconst caseId = `SCAM-${Date.now()}`;\nreturn [{ json: { case_state: { case_id: caseId, state_version: 1, suspected_scam: 'WhatsApp work-from-home registration-fee fraud', sources: [], evidence: [{ evidence_id: 'USER-E-001', source_id: 'USER-SUBMISSION', claim: 'The reporter received a work-from-home offer requiring an upfront registration fee.', excerpt: 'Pay a registration fee today to unlock your work assignment.', support: 'user_supplied', status: 'unverified' }], indicators: ['upfront fee', 'unsolicited work offer'], analysis: { user_summary: 'A WhatsApp account offered work from home and requested a registration fee.', scam_type: 'job scam' }, missing_information: [], research_count: 0, revision_count: 0, agent_history: [], created_at: now, updated_at: now }, incoming_message: { case_id: caseId, sender: 'scam_analysis_agent', recipient: 'verification_agent', message_type: 'VERIFICATION_REQUEST', objective: 'Verify whether this report matches a known scam pattern; request public research if necessary.', evidence_refs: ['USER-E-001'], findings: ['Upfront payment request in an unsolicited work offer.'], confidence: 0.5, rationale: 'Safe Phase 2 demonstration input.', missing_information: [], requested_action: 'VERIFY_KNOWN_SCAM_PATTERN', recommended_action: 'SEND_TO_VERIFICATION', status: 'READY_FOR_VERIFICATION', timestamp: now } } }];"},
-      "id": "e43cb044-60f4-4f6f-9d33-000000000002", "name": "Initialise Safe Verification Case", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [440, 300]
-    },
-    {"parameters": {"workflowId": {"__rl": true, "value": "", "mode": "list", "cachedResultName": "Select Phase 2 - Verification Agent"}, "options": {"waitForSubWorkflow": true}}, "id": "e43cb044-60f4-4f6f-9d33-000000000003", "name": "Invoke Verification Agent", "type": "n8n-nodes-base.executeWorkflow", "typeVersion": 1.2, "position": [680, 300]},
-    {
-      "parameters": {"jsCode": "const before = $('Initialise Safe Verification Case').first().json.case_state;\nconst result = $input.first().json;\nconst state = { ...before, ...(result.case_patch ?? {}), state_version: (before.state_version ?? 0) + 1, updated_at: new Date().toISOString() };\nreturn [{ json: { case_state: state, verification_message: result.message } }];"},
-      "id": "e43cb044-60f4-4f6f-9d33-000000000004", "name": "Merge First Verification Result", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [900, 300]
-    },
-    {"parameters": {"conditions": {"string": [{"value1": "={{ $json.verification_message.recommended_action }}", "operation": "equals", "value2": "SEND_TO_SEARCH"}]}}, "id": "e43cb044-60f4-4f6f-9d33-000000000005", "name": "Research Needed?", "type": "n8n-nodes-base.if", "typeVersion": 2.2, "position": [1120, 300]},
-    {
-      "parameters": {"jsCode": "const current = $input.first().json;\nreturn [{ json: { case_state: current.case_state, incoming_message: current.verification_message } }];"},
-      "id": "e43cb044-60f4-4f6f-9d33-000000000006", "name": "Prepare Search Request", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [1340, 180]
-    },
-    {"parameters": {"workflowId": {"__rl": true, "value": "", "mode": "list", "cachedResultName": "Select Phase 1 - Scam Search Agent"}, "options": {"waitForSubWorkflow": true}}, "id": "e43cb044-60f4-4f6f-9d33-000000000007", "name": "Invoke Scam Search Agent", "type": "n8n-nodes-base.executeWorkflow", "typeVersion": 1.2, "position": [1550, 180]},
-    {
-      "parameters": {"jsCode": "const before = $('Prepare Search Request').first().json.case_state;\nconst result = $input.first().json;\nconst state = { ...before, ...(result.case_patch ?? {}), state_version: (before.state_version ?? 0) + 1, updated_at: new Date().toISOString() };\nreturn [{ json: { case_state: state, incoming_message: result.message } }];"},
-      "id": "e43cb044-60f4-4f6f-9d33-000000000008", "name": "Merge Search Result", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [1770, 180]
-    },
-    {"parameters": {"workflowId": {"__rl": true, "value": "", "mode": "list", "cachedResultName": "Select Phase 2 - Verification Agent"}, "options": {"waitForSubWorkflow": true}}, "id": "e43cb044-60f4-4f6f-9d33-000000000009", "name": "Invoke Re-verification Agent", "type": "n8n-nodes-base.executeWorkflow", "typeVersion": 1.2, "position": [1990, 180]},
-    {
-      "parameters": {"jsCode": "const before = $('Merge Search Result').first().json.case_state;\nconst result = $input.first().json;\nconst state = { ...before, ...(result.case_patch ?? {}), state_version: (before.state_version ?? 0) + 1, updated_at: new Date().toISOString() };\nreturn [{ json: { case_state: state, verification_message: result.message } }];"},
-      "id": "e43cb044-60f4-4f6f-9d33-000000000010", "name": "Merge Re-verification Result", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [2210, 180]
+      "parameters": {},
+      "id": "e43cb044-60f4-4f6f-9d33-000000000001",
+      "name": "Manual Demo Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        224,
+        304
+      ]
     },
     {
-      "parameters": {"jsCode": "const current = $input.first().json;\nreturn [{ json: { case_state: current.case_state, verification_message: current.verification_message } }];"},
-      "id": "e43cb044-60f4-4f6f-9d33-000000000011", "name": "Prepare Alert Decision", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [2440, 300]
+      "parameters": {
+        "jsCode": "const now = new Date().toISOString();\nconst caseId = `SCAM-${Date.now()}`;\nreturn [{ json: { case_state: { case_id: caseId, state_version: 1, suspected_scam: 'WhatsApp work-from-home registration-fee fraud', sources: [], evidence: [{ evidence_id: 'USER-E-001', source_id: 'USER-SUBMISSION', claim: 'The reporter received a work-from-home offer requiring an upfront registration fee.', excerpt: 'Pay a registration fee today to unlock your work assignment.', support: 'user_supplied', status: 'unverified' }], indicators: ['upfront fee', 'unsolicited work offer'], analysis: { user_summary: 'A WhatsApp account offered work from home and requested a registration fee.', scam_type: 'job scam' }, missing_information: [], research_count: 0, revision_count: 0, agent_history: [], created_at: now, updated_at: now }, incoming_message: { case_id: caseId, sender: 'scam_analysis_agent', recipient: 'verification_agent', message_type: 'VERIFICATION_REQUEST', objective: 'Verify whether this report matches a known scam pattern; request public research if necessary.', evidence_refs: ['USER-E-001'], findings: ['Upfront payment request in an unsolicited work offer.'], confidence: 0.5, rationale: 'Safe Phase 2 demonstration input.', missing_information: [], requested_action: 'VERIFY_KNOWN_SCAM_PATTERN', recommended_action: 'SEND_TO_VERIFICATION', status: 'READY_FOR_VERIFICATION', timestamp: now } } }];"
+      },
+      "id": "e43cb044-60f4-4f6f-9d33-000000000002",
+      "name": "Initialise Safe Verification Case",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        304
+      ]
     },
-    {"parameters": {"conditions": {"string": [{"value1": "={{ $json.verification_message.recommended_action }}", "operation": "equals", "value2": "SEND_TO_ALERT"}]}}, "id": "e43cb044-60f4-4f6f-9d33-000000000012", "name": "Alert Eligible?", "type": "n8n-nodes-base.if", "typeVersion": 2.2, "position": [2660, 300]},
-    {"parameters": {"workflowId": {"__rl": true, "value": "", "mode": "list", "cachedResultName": "Select Phase 2 - Scam Alert Agent"}, "options": {"waitForSubWorkflow": true}}, "id": "e43cb044-60f4-4f6f-9d33-000000000013", "name": "Invoke Scam Alert Agent", "type": "n8n-nodes-base.executeWorkflow", "typeVersion": 1.2, "position": [2880, 180]},
     {
-      "parameters": {"jsCode": "const before = $('Prepare Alert Decision').first().json.case_state;\nconst result = $input.first().json;\nconst state = { ...before, ...(result.case_patch ?? {}), state_version: (before.state_version ?? 0) + 1, updated_at: new Date().toISOString() };\nreturn [{ json: { case_state: state, final_message: result.message, next_stage: result.message.recommended_action === 'APPROVE_ALERT' ? 'PHASE_3_PUBLICATION_GUARD' : 'HELD_FOR_REVIEW' } }];"},
-      "id": "e43cb044-60f4-4f6f-9d33-000000000014", "name": "Merge Alert Result", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [3100, 180]
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "FIYB5Cv8Q0HH8eeD",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/FIYB5Cv8Q0HH8eeD",
+          "cachedResultName": "Phase 2 - Verification Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "e43cb044-60f4-4f6f-9d33-000000000003",
+      "name": "Invoke Verification Agent",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        688,
+        304
+      ]
     },
     {
-      "parameters": {"jsCode": "const current = $input.first().json;\nconst message = current.final_message ?? current.verification_message;\nreturn [{ json: { ...current, final_message: message, next_stage: current.next_stage ?? message.recommended_action, note: 'This controller never calls Telegram. Phase 3 must separately enforce the publication guard.' } }];"},
-      "id": "e43cb044-60f4-4f6f-9d33-000000000015", "name": "Show Phase 2 Decision", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [3100, 410]
+      "parameters": {
+        "jsCode": "const before = $('Initialise Safe Verification Case').first().json.case_state;\nconst result = $input.first().json;\nconst state = { ...before, ...(result.case_patch ?? {}), state_version: (before.state_version ?? 0) + 1, updated_at: new Date().toISOString() };\nreturn [{ json: { case_state: state, verification_message: result.message } }];"
+      },
+      "id": "e43cb044-60f4-4f6f-9d33-000000000004",
+      "name": "Merge First Verification Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.verification_message.recommended_action }}",
+              "operation": "equals",
+              "value2": "SEND_TO_SEARCH"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e43cb044-60f4-4f6f-9d33-000000000005",
+      "name": "Research Needed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const current = $input.first().json;\nreturn [{ json: { case_state: current.case_state, incoming_message: current.verification_message } }];"
+      },
+      "id": "e43cb044-60f4-4f6f-9d33-000000000006",
+      "name": "Prepare Search Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "Oyr7kvWm4rpGmjB8",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/Oyr7kvWm4rpGmjB8",
+          "cachedResultName": "Phase 1 - Scam Search Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "e43cb044-60f4-4f6f-9d33-000000000007",
+      "name": "Invoke Scam Search Agent",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1552,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const before = $('Prepare Search Request').first().json.case_state;\nconst result = $input.first().json;\nconst state = { ...before, ...(result.case_patch ?? {}), state_version: (before.state_version ?? 0) + 1, updated_at: new Date().toISOString() };\nreturn [{ json: { case_state: state, incoming_message: result.message } }];"
+      },
+      "id": "e43cb044-60f4-4f6f-9d33-000000000008",
+      "name": "Merge Search Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1776,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "FIYB5Cv8Q0HH8eeD",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/FIYB5Cv8Q0HH8eeD",
+          "cachedResultName": "Phase 2 - Verification Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "e43cb044-60f4-4f6f-9d33-000000000009",
+      "name": "Invoke Re-verification Agent",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2000,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const before = $('Merge Search Result').first().json.case_state;\nconst result = $input.first().json;\nconst state = { ...before, ...(result.case_patch ?? {}), state_version: (before.state_version ?? 0) + 1, updated_at: new Date().toISOString() };\nreturn [{ json: { case_state: state, verification_message: result.message } }];"
+      },
+      "id": "e43cb044-60f4-4f6f-9d33-000000000010",
+      "name": "Merge Re-verification Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2224,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const current = $input.first().json;\nreturn [{ json: { case_state: current.case_state, verification_message: current.verification_message } }];"
+      },
+      "id": "e43cb044-60f4-4f6f-9d33-000000000011",
+      "name": "Prepare Alert Decision",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2448,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.verification_message.recommended_action }}",
+              "operation": "equals",
+              "value2": "SEND_TO_ALERT"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e43cb044-60f4-4f6f-9d33-000000000012",
+      "name": "Alert Eligible?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2672,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "qGncLaPFpSEVd7IS",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/qGncLaPFpSEVd7IS",
+          "cachedResultName": "Phase 2 - Scam Alert Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "e43cb044-60f4-4f6f-9d33-000000000013",
+      "name": "Invoke Scam Alert Agent",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2880,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const before = $('Prepare Alert Decision').first().json.case_state;\nconst result = $input.first().json;\nconst state = { ...before, ...(result.case_patch ?? {}), state_version: (before.state_version ?? 0) + 1, updated_at: new Date().toISOString() };\nreturn [{ json: { case_state: state, final_message: result.message, next_stage: result.message.recommended_action === 'APPROVE_ALERT' ? 'PHASE_3_PUBLICATION_GUARD' : 'HELD_FOR_REVIEW' } }];"
+      },
+      "id": "e43cb044-60f4-4f6f-9d33-000000000014",
+      "name": "Merge Alert Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3104,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const current = $input.first().json;\nconst message = current.final_message ?? current.verification_message;\nreturn [{ json: { ...current, final_message: message, next_stage: current.next_stage ?? message.recommended_action, note: 'This controller never calls Telegram. Phase 3 must separately enforce the publication guard.' } }];"
+      },
+      "id": "e43cb044-60f4-4f6f-9d33-000000000015",
+      "name": "Show Phase 2 Decision",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3104,
+        416
+      ]
     }
   ],
   "connections": {
-    "Manual Demo Trigger": {"main": [[{"node": "Initialise Safe Verification Case", "type": "main", "index": 0}]]},
-    "Initialise Safe Verification Case": {"main": [[{"node": "Invoke Verification Agent", "type": "main", "index": 0}]]},
-    "Invoke Verification Agent": {"main": [[{"node": "Merge First Verification Result", "type": "main", "index": 0}]]},
-    "Merge First Verification Result": {"main": [[{"node": "Research Needed?", "type": "main", "index": 0}]]},
-    "Research Needed?": {"main": [[{"node": "Prepare Search Request", "type": "main", "index": 0}], [{"node": "Prepare Alert Decision", "type": "main", "index": 0}]]},
-    "Prepare Search Request": {"main": [[{"node": "Invoke Scam Search Agent", "type": "main", "index": 0}]]},
-    "Invoke Scam Search Agent": {"main": [[{"node": "Merge Search Result", "type": "main", "index": 0}]]},
-    "Merge Search Result": {"main": [[{"node": "Invoke Re-verification Agent", "type": "main", "index": 0}]]},
-    "Invoke Re-verification Agent": {"main": [[{"node": "Merge Re-verification Result", "type": "main", "index": 0}]]},
-    "Merge Re-verification Result": {"main": [[{"node": "Prepare Alert Decision", "type": "main", "index": 0}]]},
-    "Prepare Alert Decision": {"main": [[{"node": "Alert Eligible?", "type": "main", "index": 0}]]},
-    "Alert Eligible?": {"main": [[{"node": "Invoke Scam Alert Agent", "type": "main", "index": 0}], [{"node": "Show Phase 2 Decision", "type": "main", "index": 0}]]},
-    "Invoke Scam Alert Agent": {"main": [[{"node": "Merge Alert Result", "type": "main", "index": 0}]]},
-    "Merge Alert Result": {"main": [[{"node": "Show Phase 2 Decision", "type": "main", "index": 0}]]}
+    "Manual Demo Trigger": {
+      "main": [
+        [
+          {
+            "node": "Initialise Safe Verification Case",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialise Safe Verification Case": {
+      "main": [
+        [
+          {
+            "node": "Invoke Verification Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invoke Verification Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge First Verification Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge First Verification Result": {
+      "main": [
+        [
+          {
+            "node": "Research Needed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Needed?": {
+      "main": [
+        [
+          {
+            "node": "Prepare Search Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Alert Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Search Request": {
+      "main": [
+        [
+          {
+            "node": "Invoke Scam Search Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invoke Scam Search Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge Search Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Search Result": {
+      "main": [
+        [
+          {
+            "node": "Invoke Re-verification Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invoke Re-verification Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge Re-verification Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Re-verification Result": {
+      "main": [
+        [
+          {
+            "node": "Prepare Alert Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Alert Decision": {
+      "main": [
+        [
+          {
+            "node": "Alert Eligible?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alert Eligible?": {
+      "main": [
+        [
+          {
+            "node": "Invoke Scam Alert Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Show Phase 2 Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invoke Scam Alert Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge Alert Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Alert Result": {
+      "main": [
+        [
+          {
+            "node": "Show Phase 2 Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
-  "pinData": {}, "active": false, "settings": {"executionOrder": "v1"}, "meta": {"templateCredsSetupCompleted": false}, "tags": []
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "4b3deb81-888f-4c0c-bc3b-9bf905ca27b1"
 }
