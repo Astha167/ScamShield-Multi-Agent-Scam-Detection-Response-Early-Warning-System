@@ -63,7 +63,10 @@ $('#search-form').addEventListener('submit', async (event) => {
   try {
     const response = await fetch('/webhook/scam-search', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({query: new FormData(form).get('query')}) });
     if (!response.ok) throw new Error(response.status === 404 || response.status === 500 ? 'The Scam Search workflow is not published.' : `Request failed (${response.status})`);
-    const raw = await response.json(); const output = Array.isArray(raw) ? raw[0] : raw; const sources = output.case_patch?.sources ?? [];
+    const raw = await response.json(); const output = Array.isArray(raw) ? raw[0] : raw;
+    // The live Azure Search workflow returns `search_decision.sources`;
+    // older/local controller outputs may wrap those records in `case_patch`.
+    const sources = output.search_decision?.sources ?? output.case_patch?.sources ?? output.sources ?? [];
     if (!sources.length) { status.textContent = 'No relevant current reports were returned for this search.'; return; }
     status.textContent = `${sources.length} source${sources.length === 1 ? '' : 's'} found.`; status.classList.add('success');
     sources.forEach((source) => { const card = document.createElement('article'); card.className = 'panel'; const title = document.createElement('h2'); title.textContent = source.title || 'Reported scam coverage'; const link = document.createElement('a'); link.href = source.url; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.textContent = 'Read original article ↗'; const note = document.createElement('p'); note.textContent = 'This is a news search result. Treat allegations as reported information and verify details independently.'; card.append(title, note, link); results.append(card); });
